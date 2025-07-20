@@ -2,6 +2,23 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Construct Redis URL from components if not explicitly set
+const constructRedisUrl = (): string => {
+  if (process.env.REDIS_URL && !process.env.REDIS_URL.includes('localhost:6379')) {
+    return process.env.REDIS_URL;
+  }
+  
+  const host = process.env.REDIS_HOST || 'localhost';
+  const port = process.env.REDIS_PORT || '6379';
+  const password = process.env.REDIS_PASSWORD;
+  
+  if (password) {
+    return `redis://:${password}@${host}:${port}`;
+  }
+  
+  return `redis://${host}:${port}`;
+};
+
 export const config = {
   jwt: {
     secret: process.env.JWT_SECRET!,
@@ -13,7 +30,10 @@ export const config = {
     url: process.env.DATABASE_URL!
   },
   redis: {
-    url: process.env.REDIS_URL!
+    url: constructRedisUrl(),
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
+    password: process.env.REDIS_PASSWORD
   },
   server: {
     port: parseInt(process.env.PORT || '5000', 10),
@@ -28,8 +48,7 @@ export const config = {
 const requiredEnvVars = [
   'JWT_SECRET',
   'JWT_REFRESH_SECRET',
-  'DATABASE_URL',
-  'REDIS_URL'
+  'DATABASE_URL'
 ];
 
 for (const envVar of requiredEnvVars) {

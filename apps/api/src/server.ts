@@ -2,30 +2,29 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import Redis from 'ioredis';
-
-// Load environment variables
-dotenv.config();
+import logger from './utils/logger';
+import { config } from './config';
 
 // Import routes
 import authRoutes from './routes/auth.routes';
+import { projectsRouter } from './routes/projects';
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = config.server.port;
 
 // Initialize Prisma
 export const prisma = new PrismaClient();
 
 // Initialize Redis
-export const redis = new Redis(process.env.REDIS_URL || 'redis://:prahok_redis_2024@localhost:6379');
+export const redis = new Redis(config.redis.url);
 
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:3000'],
+  origin: config.cors.origins,
   credentials: true
 }));
 app.use(express.json());
@@ -59,18 +58,25 @@ app.get('/health', async (_, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectsRouter);
 
 // 404 handler
 app.use((_, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
+// Define error type
+interface HttpError extends Error {
+  status?: number;
+  stack?: string;
+}
+
 // Error handling middleware
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(err.stack);
+app.use((err: HttpError, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error('Unhandled error:', err);
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(config.server.env === 'development' && { stack: err.stack })
   });
 });
 
@@ -79,28 +85,43 @@ const startServer = async () => {
   try {
     // Connect to database
     await prisma.$connect();
-    console.log('✅ Database connected');
+    logger.info('✅ Database connected');
     
     // Test Redis connection
     await redis.ping();
-    console.log('✅ Redis connected');
+    logger.info('✅ Redis connected');
     
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`📝 Environment: ${process.env.NODE_ENV}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      logger.info(`🚀 Server running on http://localhost:${PORT}`);
+      logger.info(`📝 Environment: ${config.server.env}`);
+    }).on('error', (err) => {
+      logger.error('Server listen error:', err);
+      process.exit(1);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    logger.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 };
 
 // Handle graceful shutdown
 process.on('SIGINT', async () => {
-  console.log('\n👋 Shutting down gracefully...');
+  logger.info('\n👋 Shutting down gracefully...');
   await prisma.$disconnect();
   redis.disconnect();
   process.exit(0);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
 });
 
 // Start the server

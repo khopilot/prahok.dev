@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import api from '@/lib/api';
+import { AxiosErrorWithResponse } from '@/lib/types';
 
 interface User {
   id: string;
@@ -48,10 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const response = await api.get('/auth/me');
       setUser(response.data.user);
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as AxiosErrorWithResponse;
       console.error('Failed to fetch user:', error);
       // Only remove tokens if it's not a 401 error (which is expected when no valid token)
-      if (error.response?.status !== 401) {
+      if (axiosError.response?.status !== 401) {
         Cookies.remove('access_token');
         Cookies.remove('refresh_token');
       }
@@ -63,43 +65,118 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔐 Login attempt:', { email, passwordLength: password.length });
+      }
+      
       const response = await api.post('/auth/login', { email, password });
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Login response:', response.status, response.data);
+      }
+      
       const { accessToken, refreshToken, user } = response.data;
 
-      Cookies.set('access_token', accessToken, { secure: true, sameSite: 'lax' });
-      Cookies.set('refresh_token', refreshToken, { secure: true, sameSite: 'lax' });
+      Cookies.set('access_token', accessToken, { 
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: 'lax' 
+      });
+      Cookies.set('refresh_token', refreshToken, { 
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: 'lax' 
+      });
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🍪 Cookies set, user:', user);
+      }
       
       setUser(user);
-      router.push('/dashboard');
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Login failed');
+      router.push('/editor');
+    } catch (error) {
+      const axiosError = error as AxiosErrorWithResponse;
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ Login error:', {
+          status: axiosError.response?.status,
+          data: axiosError.response?.data,
+          message: axiosError.message
+        });
+      }
+      
+      throw new Error(axiosError.response?.data?.error || axiosError.response?.data?.message || 'Login failed');
     }
   };
 
   const signup = async (email: string, username: string, password: string) => {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📝 Signup attempt:', { email, username, passwordLength: password.length });
+      }
+      
       const response = await api.post('/auth/signup', { email, username, password });
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Signup response:', response.status, response.data);
+      }
+      
       const { accessToken, refreshToken, user } = response.data;
 
-      Cookies.set('access_token', accessToken, { secure: true, sameSite: 'lax' });
-      Cookies.set('refresh_token', refreshToken, { secure: true, sameSite: 'lax' });
+      Cookies.set('access_token', accessToken, { 
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: 'lax' 
+      });
+      Cookies.set('refresh_token', refreshToken, { 
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: 'lax' 
+      });
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🍪 Signup cookies set, user:', user);
+      }
       
       setUser(user);
-      router.push('/dashboard');
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Signup failed');
+      router.push('/editor');
+    } catch (error) {
+      const axiosError = error as AxiosErrorWithResponse;
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ Signup error:', {
+          status: axiosError.response?.status,
+          data: axiosError.response?.data,
+          message: axiosError.message
+        });
+      }
+      
+      throw new Error(axiosError.response?.data?.error || axiosError.response?.data?.message || 'Signup failed');
     }
   };
 
   const logout = async () => {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚪 Starting logout process');
+      }
+      
       const refreshToken = Cookies.get('refresh_token');
       if (refreshToken) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔄 Calling logout API with refresh token');
+        }
         await api.post('/auth/logout', { refreshToken });
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Logout API call successful');
+        }
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ Logout API error:', error);
+      }
     } finally {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🧹 Cleaning up cookies and redirecting');
+      }
+      
       Cookies.remove('access_token');
       Cookies.remove('refresh_token');
       setUser(null);

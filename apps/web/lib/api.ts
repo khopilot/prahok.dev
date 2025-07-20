@@ -17,17 +17,49 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🌐 API Request:', {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        baseURL: config.baseURL,
+        fullURL: `${config.baseURL}${config.url}`,
+        hasToken: !!token,
+        data: config.data
+      });
+    }
+    
     return config;
   },
   (error) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('🚨 API Request Error:', error);
+    }
     return Promise.reject(error);
   }
 );
 
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ API Response:', {
+        status: response.status,
+        url: response.config.url,
+        data: response.data
+      });
+    }
+    return response;
+  },
   async (error) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ API Response Error:', {
+        status: error.response?.status,
+        url: error.config?.url,
+        data: error.response?.data,
+        message: error.message
+      });
+    }
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -45,8 +77,14 @@ api.interceptors.response.use(
 
         const { accessToken, refreshToken: newRefreshToken } = response.data;
         
-        Cookies.set('access_token', accessToken, { secure: true, sameSite: 'lax' });
-        Cookies.set('refresh_token', newRefreshToken, { secure: true, sameSite: 'lax' });
+        Cookies.set('access_token', accessToken, { 
+          secure: process.env.NODE_ENV === 'production', 
+          sameSite: 'lax' 
+        });
+        Cookies.set('refresh_token', newRefreshToken, { 
+          secure: process.env.NODE_ENV === 'production', 
+          sameSite: 'lax' 
+        });
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);

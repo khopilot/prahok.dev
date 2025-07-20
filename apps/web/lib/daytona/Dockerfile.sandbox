@@ -1,0 +1,56 @@
+# Dockerfile for Daytona sandbox with Claude Code capabilities
+FROM node:20-alpine
+
+# Install essential tools
+RUN apk add --no-cache \
+    git \
+    bash \
+    curl \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/cache/apk/*
+
+# Set working directory
+WORKDIR /workspace
+
+# Install global npm packages
+RUN npm install -g \
+    @anthropic-ai/claude-code \
+    typescript \
+    tsx \
+    @types/node
+
+# Create Next.js app structure
+RUN npx create-next-app@latest . \
+    --typescript \
+    --tailwind \
+    --app \
+    --no-src-dir \
+    --import-alias "@/*" \
+    --no-git
+
+# Install Claude Code SDK and dependencies
+RUN npm install \
+    @anthropic-ai/claude-code \
+    @daytonaio/sdk \
+    dotenv
+
+# Copy environment template
+COPY .env.sandbox /workspace/.env.local
+
+# Create directories for generated code
+RUN mkdir -p \
+    /workspace/generated \
+    /workspace/public \
+    /workspace/app
+
+# Expose port for Next.js
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
+
+# Start command
+CMD ["npm", "run", "dev"]

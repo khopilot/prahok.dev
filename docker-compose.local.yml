@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: prahok_postgres_local
+    environment:
+      POSTGRES_USER: prahok_user
+      POSTGRES_PASSWORD: prahok_secure_pass_2024
+      POSTGRES_DB: prahok_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prahok_user -d prahok_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: prahok_redis_local
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_local:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: MailDev for local email testing
+  maildev:
+    image: maildev/maildev
+    container_name: prahok_maildev
+    ports:
+      - "1025:1025"  # SMTP port
+      - "1080:1080"  # Web UI
+    restart: unless-stopped
+
+volumes:
+  postgres_data_local:
+  redis_data_local:

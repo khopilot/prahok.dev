@@ -1,0 +1,168 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  password      String
+  firstName     String?
+  lastName      String?
+  avatar        String?
+  bio           String?
+  isActive      Boolean   @default(true)
+  isVerified    Boolean   @default(false)
+  role          UserRole  @default(USER)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relations
+  recipes       Recipe[]
+  ratings       Rating[]
+  comments      Comment[]
+  sessions      Session[]
+  
+  @@index([email])
+  @@index([username])
+}
+
+model Session {
+  id            String    @id @default(cuid())
+  userId        String
+  token         String    @unique
+  ipAddress     String?
+  userAgent     String?
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([token])
+  @@index([userId])
+}
+
+model Recipe {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  description   String
+  ingredients   Json      // Array of ingredients with amounts
+  instructions  Json      // Array of step-by-step instructions
+  prepTime      Int       // in minutes
+  cookTime      Int       // in minutes
+  servings      Int
+  difficulty    Difficulty
+  
+  authorId      String
+  categoryId    String?
+  
+  isPublished   Boolean   @default(false)
+  isFeatured    Boolean   @default(false)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  author        User      @relation(fields: [authorId], references: [id])
+  category      Category? @relation(fields: [categoryId], references: [id])
+  images        RecipeImage[]
+  ratings       Rating[]
+  comments      Comment[]
+  tags          Tag[]
+  
+  @@index([slug])
+  @@index([authorId])
+  @@index([categoryId])
+}
+
+model Category {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  slug          String    @unique
+  description   String?
+  image         String?
+  
+  recipes       Recipe[]
+  
+  @@index([slug])
+}
+
+model RecipeImage {
+  id            String    @id @default(cuid())
+  recipeId      String
+  url           String
+  caption       String?
+  isPrimary     Boolean   @default(false)
+  order         Int       @default(0)
+  
+  recipe        Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  @@index([recipeId])
+}
+
+model Rating {
+  id            String    @id @default(cuid())
+  recipeId      String
+  userId        String
+  rating        Int       // 1-5
+  review        String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  recipe        Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id])
+  
+  @@unique([recipeId, userId])
+  @@index([recipeId])
+  @@index([userId])
+}
+
+model Comment {
+  id            String    @id @default(cuid())
+  recipeId      String
+  userId        String
+  content       String
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  recipe        Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id])
+  
+  @@index([recipeId])
+  @@index([userId])
+}
+
+model Tag {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  slug          String    @unique
+  
+  recipes       Recipe[]
+  
+  @@index([slug])
+}
+
+enum UserRole {
+  USER
+  CHEF
+  ADMIN
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}

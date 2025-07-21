@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>វចនានុក្រមភាសាខ្មែរ | Khmer Dictionary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>វចនានុក្រមខ្មែរ</h1>
+                <span>Khmer Dictionary</span>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-tab="search">
+                    <i class="fas fa-search"></i>
+                    ស្វែងរក
+                </button>
+                <button class="nav-btn" data-tab="history">
+                    <i class="fas fa-history"></i>
+                    ប្រវត្តិ
+                </button>
+                <button class="nav-btn" data-tab="popular">
+                    <i class="fas fa-fire"></i>
+                    ពេញនិយម
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Search Tab -->
+            <div id="search-tab" class="tab-content active">
+                <!-- Search Section -->
+                <section class="search-section">
+                    <div class="search-container">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input 
+                                type="text" 
+                                id="search-input" 
+                                placeholder="វាយបញ្ចូលពាក្យដែលចង់ស្វែងរក..."
+                                autocomplete="off"
+                            >
+                            <button id="clear-search" class="clear-btn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="search-suggestions" class="suggestions"></div>
+                    </div>
+                </section>
+
+                <!-- Results Section -->
+                <section id="results-section" class="results-section">
+                    <div class="word-card" id="word-display">
+                        <!-- Word results will be displayed here -->
+                    </div>
+                </section>
+
+                <!-- Welcome Message -->
+                <section id="welcome-section" class="welcome-section">
+                    <div class="welcome-card">
+                        <div class="welcome-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h2>ស្វាគមន៍មកកាន់វចនានុក្រមភាសាខ្មែរ</h2>
+                        <p>ស្វែងរកអត្ថន័យពាក្យជាភាសាខ្មែរ និងភាសាអង់គ្លេស</p>
+                        <div class="feature-list">
+                            <div class="feature">
+                                <i class="fas fa-language"></i>
+                                <span>អត្ថន័យជាភាសាខ្មែរ និងអង់គ្លេស</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-volume-up"></i>
+                                <span>ការបញ្ចេញសំឡេង</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-example"></i>
+                                <span>ឧទាហរណ៍ប្រើប្រាស់</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- History Tab -->
+            <div id="history-tab" class="tab-content">
+                <div class="history-container">
+                    <div class="section-header">
+                        <h2>ប្រវត្តិការស្វែងរក</h2>
+                        <button id="clear-history" class="clear-history-btn">
+                            <i class="fas fa-trash"></i>
+                            លុបប្រវត្តិ
+                        </button>
+                    </div>
+                    <div id="history-list" class="history-list">
+                        <!-- History items will be displayed here -->
+                    </div>
+                    <div id="no-history" class="no-history">
+                        <i class="fas fa-history"></i>
+                        <p>មិនមានប្រវត្តិការស្វែងរក</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popular Tab -->
+            <div id="popular-tab" class="tab-content">
+                <div class="popular-container">
+                    <div class="section-header">
+                        <h2>ពាក្យពេញនិយម</h2>
+                    </div>
+                    <div id="popular-words" class="popular-grid">
+                        <!-- Popular words will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Audio Element for pronunciation -->
+    <audio id="audio-player" preload="none"></audio>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

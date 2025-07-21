@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { query, type SDKMessage } from "@anthropic-ai/claude-code";
+import '@/lib/load-env';
 
 export const runtime = 'nodejs';
 

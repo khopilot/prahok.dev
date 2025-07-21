@@ -55,13 +55,9 @@ Write the file NOW.
       messages.push(message);
       console.log(`📨 Message type: ${message.type}`);
       
-      // Log tool usage specifically
-      if (message.type === 'tool_use') {
-        console.log('🔧 Tool being used:', JSON.stringify(message, null, 2));
-      }
-      
-      if (message.type === 'tool_result') {
-        console.log('✅ Tool result:', JSON.stringify(message, null, 2));
+      // Log message content for debugging
+      if (message.type === 'assistant' || message.type === 'result') {
+        console.log('📝 Message content:', JSON.stringify(message, null, 2));
       }
     }
 

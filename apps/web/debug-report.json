@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-07-20T13:15:08.553Z",
+  "environment": "development",
+  "baseUrl": "http://localhost:3000",
+  "issues": [
+    "Backend API is not running"
+  ],
+  "recommendations": [
+    "Start the backend server on port 5000 for full functionality"
+  ]
+}

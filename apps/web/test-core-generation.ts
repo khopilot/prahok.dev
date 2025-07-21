@@ -62,12 +62,10 @@ Save it as "tic-tac-toe.html"
         console.log(`\n${index + 1}. Type: ${message.type}`);
         
         // Show relevant content without overwhelming output
-        if (message.type === 'tool_use') {
-          console.log('   🔧 Tool being used');
-        } else if (message.type === 'tool_result') {
-          console.log('   ✅ Tool completed');
-        } else if (message.type === 'text') {
+        if (message.type === 'assistant') {
           console.log('   💬 Claude response');
+        } else if (message.type === 'result') {
+          console.log('   ✅ Result');
         }
       });
     }

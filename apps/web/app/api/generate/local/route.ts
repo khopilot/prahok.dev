@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import '@/lib/load-env';
 // Import SDK environment config BEFORE any Claude Code imports
 import '@/lib/claude-code/sdk-env';
-import { completeGenerationProcess } from "@/lib/sandbox/complete-generation-script";
+import { generateCodeLocally } from "@/lib/sandbox/local-generation";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    const { prompt, projectName, template } = await request.json();
+    const { prompt, projectName } = await request.json();
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json(
@@ -31,54 +31,55 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🏗️ API: Starting complete sandbox generation for user:', userId);
-    console.log('🔑 API Key status:', process.env.ANTHROPIC_API_KEY ? 'Present' : 'Missing');
-    console.log('🔐 API Key length:', process.env.ANTHROPIC_API_KEY?.length || 0);
-    console.log('🌍 Environment:', process.env.NODE_ENV);
-
-    // Utiliser le script complet de génération
-    const result = await completeGenerationProcess({
+    console.log('🏗️ API: Starting local code generation for user:', userId);
+    
+    // Use local generation
+    const result = await generateCodeLocally({
       prompt,
-      userId: userId.replace(/[^a-z0-9]/gi, '-'), // Sanitize for sandbox naming
+      userId,
       projectName,
-      language: 'km' // Khmer par défaut
+      language: 'km' // Khmer by default
     });
 
-    console.log('✅ API: Sandbox generation completed:', {
+    console.log('✅ API: Local generation completed:', {
       success: result.success,
-      workspaceId: result.workspaceId,
-      previewUrl: result.previewUrl,
+      projectId: result.projectId,
       filesCount: result.generatedFiles.length
     });
 
     if (result.success) {
-      // Le nettoyage est déjà planifié dans le script complet
+      // Store project data for preview (in a real app, use a database or file storage)
+      const projectData = {
+        projectId: result.projectId,
+        generatedFiles: result.generatedFiles,
+        createdAt: new Date().toISOString()
+      };
       
       return NextResponse.json({
         success: true,
-        workspaceId: result.workspaceId,
-        previewUrl: result.previewUrl,
+        projectId: result.projectId,
         generatedFiles: result.generatedFiles,
         messages: result.messages,
-        // Add iframe-friendly URL for embedding
-        embedUrl: `${result.previewUrl}?embed=true`,
-        expiresIn: 3600 // seconds
+        // For local generation, we'll need a different preview solution
+        previewUrl: `/preview/${result.projectId}`,
+        embedUrl: `/preview/${result.projectId}?embed=true`,
+        // Include project data for client-side storage
+        projectData
       });
     } else {
       return NextResponse.json(
         { 
           success: false,
-          error: result.error || "Sandbox generation failed",
-          workspaceId: result.workspaceId
+          error: result.error || "Code generation failed",
+          projectId: result.projectId
         },
         { status: 500 }
       );
     }
   } catch (error) {
-    console.error('❌ API: Sandbox generation error:', error);
+    console.error('❌ API: Local generation error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     
-    // More detailed error response
     const errorMessage = error instanceof Error ? error.message : "Internal server error";
     const errorDetails = {
       success: false,

@@ -173,7 +173,7 @@ function extractGeneratedFiles(messages: SDKMessage[]): string[] {
   
   for (const message of messages) {
     // Look for file creation patterns in message content
-    if (message.type === 'tool_use' || message.type === 'tool_result') {
+    if (message.type === 'assistant' || message.type === 'result') {
       // Parse tool usage for file operations
       try {
         const content = JSON.stringify(message);

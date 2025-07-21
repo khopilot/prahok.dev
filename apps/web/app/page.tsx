@@ -26,9 +26,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black relative overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Background Image - No Filter */}
       <div 
-        className="absolute inset-0 z-0 opacity-20"
+        className="absolute inset-0 z-0"
         style={{
           backgroundImage: 'url(/u7965223339_Clean_hero_background_design_stylized_waves_patte_9e1b5d70-2118-403c-a69f-20717c2d39f5_1.png)',
           backgroundSize: 'cover',
@@ -36,9 +36,6 @@ export default function Home() {
           backgroundRepeat: 'no-repeat'
         }}
       />
-      
-      {/* Gradient Overlay for Lovable-style dark theme */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-pink-500/10 to-transparent z-10" />
       
       {/* Navigation Bar */}
       <nav className="relative z-50 flex items-center justify-between p-6">
@@ -174,8 +171,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Bottom Gradient for Visual Appeal */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/50 to-transparent z-10" />
     </div>
   );
 }

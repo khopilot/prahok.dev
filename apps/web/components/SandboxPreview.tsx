@@ -29,7 +29,7 @@ export function SandboxPreview({ workspaceId, previewUrl, embedUrl, onClose }: S
               ការមើលជាមុនកម្មវិធីរបស់អ្នក
             </h3>
             <p className="text-sm text-white/60 mt-1">
-              Workspace: {workspaceId.substring(0, 8)}...
+              Workspace: {workspaceId ? `${workspaceId.substring(0, 8)}...` : 'N/A'}
             </p>
           </div>
           

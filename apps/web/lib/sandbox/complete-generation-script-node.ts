@@ -1,10 +1,12 @@
 /**
  * Script complet orchestrant l'ensemble du processus de génération
- * Ce script encapsule toutes les étapes développées et testées isolément
+ * Version utilisant Node.js au lieu de bun
  */
 
-// Import our Node.js wrapper instead of direct Claude Code SDK
-import { executeClaudeCode, type ClaudeCodeMessage } from '../claude-code/node-wrapper';
+// Import and initialize the proxy BEFORE importing Claude Code SDK
+import '../claude-code/sdk-proxy';
+
+import { query, type SDKMessage } from "@anthropic-ai/claude-code";
 import { daytonaService } from '../daytona/client';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -47,7 +49,7 @@ export async function completeGenerationProcess(
   const messages: any[] = [];
   const generatedFiles: string[] = [];
   
-  console.log('🎯 Starting complete generation process...');
+  console.log('🎯 Starting complete generation process (Node.js version)...');
   console.log('📝 User prompt:', prompt);
 
   try {
@@ -77,7 +79,7 @@ export async function completeGenerationProcess(
       timestamp: new Date().toISOString()
     });
 
-    // Étape 2: Démarrer la sandbox (avec gestion d'état améliorée)
+    // Étape 2: Démarrer la sandbox
     console.log('\n▶️ Step 2: Starting sandbox...');
     messages.push({
       type: 'status',
@@ -98,7 +100,6 @@ export async function completeGenerationProcess(
       });
     } catch (startError: any) {
       console.log('⚠️ Sandbox start issue:', startError.message);
-      // Continue anyway - the sandbox might already be in a usable state
       messages.push({
         type: 'info',
         content: language === 'km'
@@ -112,19 +113,17 @@ export async function completeGenerationProcess(
     await new Promise(resolve => setTimeout(resolve, 5000));
     
     // Étape 3: Installer le SDK de Claude Code dans la sandbox
-    console.log('\n📥 Step 3: Installing Claude Code SDK in sandbox...');
+    console.log('\n📥 Step 3: Installing dependencies in sandbox...');
     messages.push({
       type: 'status',
       content: language === 'km'
-        ? 'កំពុងដំឡើង Claude Code SDK...'
-        : 'Installing Claude Code SDK...',
+        ? 'កំពុងដំឡើង dependencies...'
+        : 'Installing dependencies...',
       timestamp: new Date().toISOString()
     });
 
     // Installer les dépendances nécessaires
     const installCommands = [
-      'npm install @anthropic-ai/claude-code',
-      'npm install dotenv',
       'npm install --save-dev @types/node typescript tsx'
     ];
 
@@ -135,7 +134,7 @@ export async function completeGenerationProcess(
     console.log('✅ Dependencies installed');
 
     // Étape 4: Générer un site web personnalisé avec Claude Code
-    console.log('\n🤖 Step 4: Generating custom website with Claude Code...');
+    console.log('\n🤖 Step 4: Generating custom website with Claude Code (Node.js)...');
     messages.push({
       type: 'status',
       content: language === 'km'
@@ -167,30 +166,34 @@ You are generating code inside a Next.js 14 environment with:
 Create all files relative to the app directory.
 `;
 
-    // Exécuter la génération avec Claude Code via notre wrapper
+    // Exécuter la génération avec Claude Code
+    const abortController = new AbortController();
     let fileCount = 0;
     
     // Ensure API key is available
     console.log('🔑 Checking API key...');
     const apiKey = process.env.ANTHROPIC_API_KEY || ANTHROPIC_API_KEY;
-    console.log('API Key exists:', !!apiKey);
-    console.log('API Key first 10 chars:', apiKey?.substring(0, 10));
     
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY is not configured. Please set it in your .env.local file');
     }
     
-    // Execute Claude Code using our Node.js wrapper
-    console.log('🚀 Executing Claude Code via Node.js wrapper...');
-    const claudeMessages = await executeClaudeCode({
-      prompt: enhancedPrompt,
-      apiKey,
-      maxTurns: 7,
-      cwd: `/tmp/sandbox-${workspaceId}`, // Virtual path for tracking
-    });
+    // Set the API key in environment if needed
+    if (!process.env.ANTHROPIC_API_KEY) {
+      process.env.ANTHROPIC_API_KEY = apiKey;
+    }
     
-    // Process all messages
-    for (const message of claudeMessages) {
+    console.log('🚀 Starting Claude Code query (with Node.js runtime)...');
+    
+    for await (const message of query({
+      prompt: enhancedPrompt,
+      abortController,
+      options: {
+        maxTurns: 7,
+        permissionMode: 'bypassPermissions',
+        cwd: `/tmp/sandbox-${workspaceId}` // Chemin virtuel pour tracking
+      }
+    })) {
       // Traiter les messages de Claude
       if (message.type === 'assistant' && 'content' in message) {
         const content = extractReadableContent(message);
@@ -215,8 +218,7 @@ Create all files relative to the app directory.
             timestamp: new Date().toISOString()
           });
           
-          // TODO: Transférer le fichier vers la sandbox
-          // Pour l'instant, on simule avec une commande echo
+          // Transférer le fichier vers la sandbox
           const fileContent = extractFileContent(message, file);
           if (fileContent) {
             const escapedContent = fileContent.replace(/'/g, "'\"'\"'");
@@ -293,15 +295,14 @@ Create all files relative to the app directory.
     // Provide user-friendly error messages
     let userError = 'Unknown error occurred';
     if (error instanceof Error) {
-      if (error.message.includes('Depleted credits') || error.message.includes('suspended')) {
+      if (error.message.includes('spawn bun ENOENT')) {
+        userError = language === 'km'
+          ? 'បញ្ហាក្នុងការដំឡើង runtime។ សូមទាក់ទងអ្នកគ្រប់គ្រង។'
+          : 'Runtime installation issue. Please contact administrator.';
+      } else if (error.message.includes('Depleted credits') || error.message.includes('suspended')) {
         userError = language === 'km' 
           ? 'សេវា Sandbox អស់ credits ហើយ។ សូមទាក់ទងអ្នកគ្រប់គ្រង។'
           : 'Sandbox service has depleted credits. Please contact administrator.';
-        messages.push({
-          type: 'error',
-          content: userError,
-          timestamp: new Date().toISOString()
-        });
       } else if (error.message.includes('ANTHROPIC_API_KEY')) {
         userError = language === 'km'
           ? 'API Key មិនត្រូវបានកំណត់។ សូមពិនិត្យការកំណត់រចនាសម្ព័ន្ធ។'
@@ -324,8 +325,8 @@ Create all files relative to the app directory.
   }
 }
 
-// Fonctions utilitaires
-function extractReadableContent(message: ClaudeCodeMessage): string {
+// Fonctions utilitaires (same as original)
+function extractReadableContent(message: any): string {
   if (typeof message.content === 'string') {
     return message.content;
   }
@@ -340,7 +341,7 @@ function extractReadableContent(message: ClaudeCodeMessage): string {
   return '';
 }
 
-function extractFilesFromMessage(message: ClaudeCodeMessage): string[] {
+function extractFilesFromMessage(message: any): string[] {
   const files: string[] = [];
   
   if (message.content && Array.isArray(message.content)) {
@@ -356,7 +357,7 @@ function extractFilesFromMessage(message: ClaudeCodeMessage): string[] {
   return files;
 }
 
-function extractFileContent(message: ClaudeCodeMessage, filePath: string): string | null {
+function extractFileContent(message: any, filePath: string): string | null {
   if (message.content && Array.isArray(message.content)) {
     for (const block of message.content) {
       if (block.type === 'tool_use' && 

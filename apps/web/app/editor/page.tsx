@@ -8,6 +8,7 @@ import { GenerationStream } from "@/components/GenerationStream";
 import { SandboxPreview } from "@/components/SandboxPreview";
 import { EditorSidebar } from "@/components/EditorSidebar";
 import { testCases } from "@/lib/sandbox/test-cases";
+import api from "@/lib/api";
 
 interface GenerationResult {
   success: boolean;
@@ -74,14 +75,38 @@ export default function EditorPage() {
           }),
         });
 
+        let data;
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Sandbox generation failed");
+          // Try local generation as fallback
+          console.log("Sandbox generation failed, using local generation...");
+          const localResponse = await fetch("/api/generate/local", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ 
+              prompt,
+              projectName: projectName || `project-${Date.now()}`,
+            }),
+          });
+          
+          if (!localResponse.ok) {
+            const errorData = await localResponse.json();
+            throw new Error(errorData.error || "Code generation failed");
+          }
+          
+          data = await localResponse.json();
+        } else {
+          data = await response.json();
         }
 
-        const data = await response.json();
         setSandboxResult(data);
         setIsGenerating(false);
+        
+        // Store project data in localStorage for preview (if local generation)
+        if (data.projectData) {
+          localStorage.setItem(`project_${data.projectId}`, JSON.stringify(data.projectData));
+        }
         
         // Save project to database
         if (data.success) {
@@ -99,26 +124,17 @@ export default function EditorPage() {
   
   const saveProject = async (generationData: any) => {
     try {
-      const response = await fetch('http://localhost:5000/api/projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          name: projectName || `គម្រោង ${new Date().toLocaleDateString('km-KH')}`,
-          description: projectDescription || prompt.substring(0, 100) + '...',
-          prompt,
-          sandboxId: generationData.workspaceId,
-          previewUrl: generationData.previewUrl,
-          generatedFiles: generationData.generatedFiles || [],
-        }),
+      const response = await api.post('/projects', {
+        name: projectName || `គម្រោង ${new Date().toLocaleDateString('km-KH')}`,
+        description: projectDescription || prompt.substring(0, 100) + '...',
+        prompt,
+        sandboxId: generationData.workspaceId,
+        previewUrl: generationData.previewUrl,
+        generatedFiles: generationData.generatedFiles || [],
       });
       
-      if (response.ok) {
-        const { project } = await response.json();
-        setCurrentProjectId(project.id);
-      }
+      const { project } = response.data;
+      setCurrentProjectId(project.id);
     } catch (error) {
       console.error('Error saving project:', error);
     }
@@ -161,9 +177,9 @@ export default function EditorPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black relative overflow-hidden">
-      {/* Background Image with Overlay - Same as homepage */}
+      {/* Background Image - No Filter */}
       <div 
-        className="absolute inset-0 z-0 opacity-20"
+        className="absolute inset-0 z-0"
         style={{
           backgroundImage: 'url(/u7965223339_Clean_hero_background_design_stylized_waves_patte_9e1b5d70-2118-403c-a69f-20717c2d39f5_1.png)',
           backgroundSize: 'cover',
@@ -171,9 +187,6 @@ export default function EditorPage() {
           backgroundRepeat: 'no-repeat'
         }}
       />
-      
-      {/* Gradient Overlay for Lovable-style dark theme */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-pink-500/10 to-transparent z-10" />
       
       {/* User Info - Top Right */}
       <div className="absolute top-6 right-6 z-50 flex items-center gap-4">
@@ -427,8 +440,6 @@ export default function EditorPage() {
         </div>
       </main>
       
-      {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/50 to-transparent z-10" />
     </div>
   );
 }

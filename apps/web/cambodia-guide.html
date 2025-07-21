@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カンボジア旅行ガイド - Cambodia Travel Guide for Japanese</title>
+    <link rel="stylesheet" href="cambodia-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇰🇭</text></svg>">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="flag">🇰🇭</span>
+                <h1>カンボジア旅行ガイド</h1>
+            </div>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="nav-menu" id="navMenu">
+                <a href="#attractions" class="nav-link">観光地</a>
+                <a href="#food" class="nav-link">料理</a>
+                <a href="#transport" class="nav-link">交通</a>
+                <a href="#phrases" class="nav-link">会話</a>
+                <a href="#tools" class="nav-link">ツール</a>
+                <a href="#emergency" class="nav-link">緊急</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h2>カンボジアへようこそ！</h2>
+            <p class="hero-subtitle">アンコールワットの神秘と現代カンボジアの魅力を発見しよう</p>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">12+</span>
+                    <span class="stat-label">世界遺産</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">30°C</span>
+                    <span class="stat-label">平均気温</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">4,000</span>
+                    <span class="stat-label">リエル = 1ドル</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="attractions" class="section">
+            <div class="container">
+                <h2 class="section-title">🏛️ 必見の観光地</h2>
+                <div class="cards-grid">
+                    <div class="card attraction-card">
+                        <div class="card-image">
+                            <div class="image-placeholder">🏛️</div>
+                        </div>
+                        <div class="card-content">
+                            <h3>アンコールワット</h3>
+                            <p class="location">シェムリアップ</p>
+                            <p>世界最大の宗教建築群。12世紀に建設されたクメール王朝の傑作。日の出鑑賞が特に人気。</p>
+                            <div class="card-tags">
+                                <span class="tag">世界遺産</span>
+                                <span class="tag">早朝推奨</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card attraction-card">
+                        <div class="card-image">
+                            <div class="image-placeholder">👑</div>
+                        </div>
+                        <div class="card-content">
+                            <h3>王宮・銀寺</h3>
+                            <p class="location">プノンペン</p>
+                            <p>現在も使用されている王宮と、5,000枚の銀タイルで装飾された銀寺。カンボジア王室の歴史を感じられる。</p>
+                            <div class="card-tags">
+                                <span class="tag">王室</span>
+                                <span class="tag">文化</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card attraction-card">
+                        <div class="card-image">
+                            <div class="image-placeholder">🌊</div>
+                        </div>
+                        <div class="card-content">
+                            <h3>トンレサップ湖</h3>
+                            <p class="location">シェムリアップ近郊</p>
+                            <p>東南アジア最大の淡水湖。水上村落を見学し、現地の人々の生活を体験できる。</p>
+                            <div class="card-tags">
+                                <span class="tag">自然</span>
+                                <span class="tag">文化体験</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card attraction-card">
+                        <div class="card-image">
+                            <div class="image-placeholder">🏖️</div>
+                        </div>
+                        <div class="card-content">
+                            <h3>シアヌークビル</h3>
+                            <p class="location">南部海岸</p>
+                            <p>美しい白砂のビーチリゾート。新鮮なシーフードと透明度の高い海が魅力。</p>
+                            <div class="card-tags">
+                                <span class="tag">ビーチ</span>
+                                <span class="tag">シーフード</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="food" class="section section-alt">
+            <div class="container">
+                <h2 class="section-title">🍜 カンボジア料理</h2>
+                <div class="cards-grid">
+                    <div class="card food-card">
+                        <div class="food-icon">🍜</div>
+                        <h3>アモック</h3>
+                        <p>ココナッツミルクベースの蒸し料理。魚や鶏肉をカレーペーストで味付けし、バナナの葉で蒸した代表的料理。</p>
+                        <div class="price">約 $3-5</div>
+                    </div>
+
+                    <div class="card food-card">
+                        <div class="food-icon">🥘</div>
+                        <h3>ロックラック</h3>
+                        <p>牛肉の炒め物。胡椒とライムの効いた味付けで、ご飯と一緒に食べる。カンボジアのソウルフード。</p>
+                        <div class="price">約 $4-6</div>
+                    </div>
+
+                    <div class="card food-card">
+                        <div class="food-icon">🍲</div>
+                        <h3>クイティウ</h3>
+                        <p>米麺のスープ。豚骨や鶏ガラベースのあっさりスープに、もやしやハーブをトッピング。朝食の定番。</p>
+                        <div class="price">約 $1-2</div>
+                    </div>
+
+                    <div class="card food-card">
+                        <div class="food-icon">🥭</div>
+                        <h3>フルーツシェイク</h3>
+                        <p>新鮮なトロピカルフルーツのシェイク。マンゴー、ドラゴンフルーツ、パッションフルーツなどが人気。</p>
+                        <div class="price">約 $1-3</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="transport" class="section">
+            <div class="container">
+                <h2 class="section-title">🚗 交通手段</h2>
+                <div class="transport-grid">
+                    <div class="transport-item">
+                        <div class="transport-icon">🛺</div>
+                        <h3>トゥクトゥク</h3>
+                        <p>最も一般的な移動手段。料金は事前交渉制。市内短距離で $1-3 程度。</p>
+                        <div class="transport-tips">
+                            <strong>コツ:</strong> 乗車前に価格交渉を必ず行う
+                        </div>
+                    </div>
+
+                    <div class="transport-item">
+                        <div class="transport-icon">🏍️</div>
+                        <h3>モトドップ</h3>
+                        <p>バイクタクシー。短距離移動に便利で安価。$0.5-2 程度。ヘルメット着用推奨。</p>
+                        <div class="transport-tips">
+                            <strong>注意:</strong> 安全のためヘルメットを必ず着用
+                        </div>
+                    </div>
+
+                    <div class="transport-item">
+                        <div class="transport-icon">🚌</div>
+                        <h3>長距離バス</h3>
+                        <p>都市間移動の主要手段。エアコン付きバスが一般的。プノンペン-シェムリアップで $5-15。</p>
+                        <div class="transport-tips">
+                            <strong>推奨:</strong> Giant Ibis、Mekong Express などの大手会社
+                        </div>
+                    </div>
+
+                    <div class="transport-item">
+                        <div class="transport-icon">✈️</div>
+                        <h3>国内線</h3>
+                        <p>プノンペン-シェムリアップ間など。約1時間、$50-150。時間節約に最適。</p>
+                        <div class="transport-tips">
+                            <strong>航空会社:</strong> Cambodia Airways、Bassaka Air
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="phrases" class="section section-alt">
+            <div class="container">
+                <h2 class="section-title">🗣️ 基本的なクメール語</h2>
+                <div class="phrases-grid">
+                    <div class="phrase-category">
+                        <h3>基本の挨拶</h3>
+                        <div class="phrase-list">
+                            <div class="phrase-item">
+                                <span class="khmer">ជំរាបសួរ</span>
+                                <span class="phonetic">チョムリアップ・スオ</span>
+                                <span class="japanese">こんにちは</span>
+                            </div>
+                            <div class="phrase-item">
+                                <span class="khmer">អរគុណ</span>
+                                <span class="phonetic">オークン</span>
+                                <span class="japanese">ありがとう</span>
+                            </div>
+                            <div class="phrase-item">
+                                <span class="khmer">សុំទោស</span>
+                                <span class="phonetic">ソム・トーホ</span>
+                                <span class="japanese">すみません</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="phrase-category">
+                        <h3>買い物・食事</h3>
+                        <div class="phrase-list">
+                            <div class="phrase-item">
+                                <span class="khmer">តម្លៃប៉ុន្មាន?</span>
+                                <span class="phonetic">タムライ・ポンマーン？</span>
+                                <span class="japanese">いくらですか？</span>
+                            </div>
+                            <div class="phrase-item">
+                                <span class="khmer">ថ្លៃណាស់</span>
+                                <span class="phonetic">タライ・ナーホ</span>
+                                <span class="japanese">高すぎます</span>
+                            </div>
+                            <div class="phrase-item">
+                                <span class="khmer">ឆ្ងាញ់</span>
+                                <span class="phonetic">チガンニ</span>
+                                <span class="japanese">美味しい</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="phrase-category">
+                        <h3>移動・道案内</h3>
+                        <div class="phrase-list">
+                            <div class="phrase-item">
+                                <span class="khmer">នេះនៅឯណា?</span>
+                                <span class="phonetic">ニーホ・ノウ・アイナー？</span>
+                                <span class="japanese">これはどこですか？</span>
+                            </div>
+                            <div class="phrase-item">
+                                <span class="khmer">ខ្ញុំត្រូវការជំនួយ</span>
+                                <span class="phonetic">クニョム・トロウカー・チョムヌオイ</span>
+                                <span class="japanese">助けが必要です</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tools" class="section">
+            <div class="container">
+                <h2 class="section-title">🛠️ 便利ツール</h2>
+                <div class="tools-grid">
+                    <div class="tool-card">
+                        <h3>💱 通貨コンバーター</h3>
+                        <div class="converter">
+                            <div class="input-group">
+                                <label for="usd-input">USD ($)</label>
+                                <input type="number" id="usd-input" placeholder="100" value="100">
+                            </div>
+                            <div class="converter-arrow">⇅</div>
+                            <div class="input-group">
+                                <label for="riel-input">リエル (KHR)</label>
+                                <input type="number" id="riel-input" placeholder="400000" readonly>
+                            </div>
+                        </div>
+                        <div class="exchange-note">
+                            <small>※ 実際のレートは変動します。目安として1USD = 4,000リエル</small>
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <h3>🌡️ 天気・気候</h3>
+                        <div class="weather-info">
+                            <div class="season">
+                                <h4>乾季 (11月-4月)</h4>
+                                <p>気温: 25-32°C<br>
+                                湿度: 低め<br>
+                                降雨: 少ない<br>
+                                <strong>ベストシーズン</strong></p>
+                            </div>
+                            <div class="season">
+                                <h4>雨季 (5月-10月)</h4>
+                                <p>気温: 24-35°C<br>
+                                湿度: 高め<br>
+                                降雨: 多い<br>
+                                <strong>緑豊かな季節</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <h3>📱 おすすめアプリ</h3>
+                        <div class="apps-list">
+                            <div class="app-item">
+                                <strong>Grab</strong> - 配車・フードデリバリー
+                            </div>
+                            <div class="app-item">
+                                <strong>Maps.me</strong> - オフライン地図
+                            </div>
+                            <div class="app-item">
+                                <strong>Google Translate</strong> - カメラ翻訳機能付き
+                            </div>
+                            <div class="app-item">
+                                <strong>XE Currency</strong> - リアルタイム為替
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="emergency" class="section section-emergency">
+            <div class="container">
+                <h2 class="section-title">🚨 緊急連絡先・安全情報</h2>
+                <div class="emergency-grid">
+                    <div class="emergency-card urgent">
+                        <h3>🚨 緊急番号</h3>
+                        <div class="emergency-contacts">
+                            <div class="contact">
+                                <strong>警察:</strong> <a href="tel:117">117</a>
+                            </div>
+                            <div class="contact">
+                                <strong>救急:</strong> <a href="tel:119">119</a>
+                            </div>
+                            <div class="contact">
+                                <strong>消防:</strong> <a href="tel:118">118</a>
+                            </div>
+                            <div class="contact">
+                                <strong>ツーリスト警察:</strong> <a href="tel:012942484">012-942-484</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="emergency-card">
+                        <h3>🇯🇵 日本領事館</h3>
+                        <div class="embassy-info">
+                            <div class="contact">
+                                <strong>在カンボジア日本国大使館</strong><br>
+                                住所: 194 Moha Vithei Preah Norodom Blvd, Phnom Penh<br>
+                                電話: <a href="tel:+85523217161">+855-23-217-161</a><br>
+                                緊急時: <a href="tel:+85512769090">+855-12-769-090</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="emergency-card">
+                        <h3>🏥 主要病院</h3>
+                        <div class="hospitals">
+                            <div class="hospital">
+                                <strong>Royal Phnom Penh Hospital</strong><br>
+                                <a href="tel:+85523991000">+855-23-991-000</a>
+                            </div>
+                            <div class="hospital">
+                                <strong>Angkor Hospital for Children (シェムリアップ)</strong><br>
+                                <a href="tel:+85563963409">+855-63-963-409</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="emergency-card">
+                        <h3>💡 安全のコツ</h3>
+                        <div class="safety-tips">
+                            <ul>
+                                <li>パスポートのコピーを常に携帯</li>
+                                <li>多額の現金は持ち歩かない</li>
+                                <li>夜間の一人歩きは避ける</li>
+                                <li>水は必ずボトル水を飲む</li>
+                                <li>貴重品は宿泊先のセーフティボックスへ</li>
+                                <li>詐欺に注意（特に両替詐欺）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>カンボジア旅行ガイド</h3>
+                    <p>日本人観光客の皆様に安全で楽しいカンボジア旅行をお届けします。</p>
+                </div>
+                <div class="footer-section">
+                    <h4>お役立ち情報</h4>
+                    <ul>
+                        <li>ビザ: アライバルビザ $30</li>
+                        <li>通貨: USD、リエル</li>
+                        <li>電圧: 230V (Aタイプ)</li>
+                        <li>時差: +2時間</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>注意事項</h4>
+                    <ul>
+                        <li>情報は変更される可能性があります</li>
+                        <li>最新情報は公式サイトでご確認ください</li>
+                        <li>緊急時は迷わず日本領事館にご連絡を</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Cambodia Travel Guide for Japanese Tourists. Made with ❤️ for safe travels.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="cambodia-script.js"></script>
+</body>
+</html>

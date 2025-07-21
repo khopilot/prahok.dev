@@ -22,13 +22,15 @@ interface EditorSidebarProps {
   currentProjectId?: string;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  onNewChat?: () => void;
 }
 
 export function EditorSidebar({ 
   onSelectProject, 
   currentProjectId, 
   isCollapsed,
-  onToggleCollapse 
+  onToggleCollapse,
+  onNewChat 
 }: EditorSidebarProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -205,7 +207,7 @@ export function EditorSidebar({
           {/* New Project Button */}
           <div className="p-4 border-t border-gray-200 bg-white">
             <button
-              onClick={() => window.location.href = '/editor'}
+              onClick={() => onNewChat?.()}
               className="w-full py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors text-center"
             >
               + គម្រោងថ្មី
@@ -220,7 +222,7 @@ export function EditorSidebar({
           {/* Quick Actions */}
           <div className="p-2 space-y-2">
             <button
-              onClick={() => window.location.href = '/editor'}
+              onClick={() => onNewChat?.()}
               className="w-full p-2.5 hover:bg-gray-100 rounded-lg transition-colors flex justify-center"
               title="គម្រោងថ្មី"
             >

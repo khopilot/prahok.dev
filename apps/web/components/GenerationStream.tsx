@@ -27,6 +27,13 @@ export function GenerationStream({ prompt, onComplete, onError }: GenerationStre
     scrollToBottom();
   }, [messages]);
 
+  // Auto-start generation when component mounts
+  useEffect(() => {
+    if (prompt && messages.length === 0) {
+      startGeneration();
+    }
+  }, []);
+
   useEffect(() => {
     if (!prompt || !isGenerating) return;
 

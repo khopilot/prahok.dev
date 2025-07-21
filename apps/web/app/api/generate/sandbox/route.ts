@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import '@/lib/load-env';
 // Import SDK environment config BEFORE any Claude Code imports
 import '@/lib/claude-code/sdk-env';
+import '@/lib/claude-code/fix-spawn';
 import { completeGenerationProcess } from "@/lib/sandbox/complete-generation-script";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";

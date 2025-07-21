@@ -3,8 +3,10 @@
  * Ce script encapsule toutes les étapes développées et testées isolément
  */
 
-// Import our Node.js wrapper instead of direct Claude Code SDK
-import { executeClaudeCode, type ClaudeCodeMessage } from '../claude-code/node-wrapper';
+// Import SDK environment config and spawn fix BEFORE any Claude Code imports
+import '../claude-code/sdk-env';
+import '../claude-code/fix-spawn';
+import { query, type SDKMessage } from "@anthropic-ai/claude-code";
 import { daytonaService } from '../daytona/client';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -167,7 +169,8 @@ You are generating code inside a Next.js 14 environment with:
 Create all files relative to the app directory.
 `;
 
-    // Exécuter la génération avec Claude Code via notre wrapper
+    // Exécuter la génération avec Claude Code
+    const abortController = new AbortController();
     let fileCount = 0;
     
     // Ensure API key is available
@@ -180,17 +183,24 @@ Create all files relative to the app directory.
       throw new Error('ANTHROPIC_API_KEY is not configured. Please set it in your .env.local file');
     }
     
-    // Execute Claude Code using our Node.js wrapper
-    console.log('🚀 Executing Claude Code via Node.js wrapper...');
-    const claudeMessages = await executeClaudeCode({
-      prompt: enhancedPrompt,
-      apiKey,
-      maxTurns: 7,
-      cwd: `/tmp/sandbox-${workspaceId}`, // Virtual path for tracking
-    });
+    // Set the API key in environment if needed
+    if (!process.env.ANTHROPIC_API_KEY) {
+      process.env.ANTHROPIC_API_KEY = apiKey;
+    }
     
-    // Process all messages
-    for (const message of claudeMessages) {
+    // Set Node.js runtime to avoid bun error
+    process.env.CLAUDE_CODE_RUNTIME = 'node';
+    
+    for await (const message of query({
+      prompt: enhancedPrompt,
+      abortController,
+      options: {
+        maxTurns: 7,
+        permissionMode: 'bypassPermissions',
+        cwd: `/tmp/sandbox-${workspaceId}`, // Chemin virtuel pour tracking
+        runtime: 'node', // Force Node.js instead of bun
+      }
+    })) {
       // Traiter les messages de Claude
       if (message.type === 'assistant' && 'content' in message) {
         const content = extractReadableContent(message);
@@ -325,7 +335,7 @@ Create all files relative to the app directory.
 }
 
 // Fonctions utilitaires
-function extractReadableContent(message: ClaudeCodeMessage): string {
+function extractReadableContent(message: any): string {
   if (typeof message.content === 'string') {
     return message.content;
   }
@@ -340,7 +350,7 @@ function extractReadableContent(message: ClaudeCodeMessage): string {
   return '';
 }
 
-function extractFilesFromMessage(message: ClaudeCodeMessage): string[] {
+function extractFilesFromMessage(message: any): string[] {
   const files: string[] = [];
   
   if (message.content && Array.isArray(message.content)) {
@@ -356,7 +366,7 @@ function extractFilesFromMessage(message: ClaudeCodeMessage): string[] {
   return files;
 }
 
-function extractFileContent(message: ClaudeCodeMessage, filePath: string): string | null {
+function extractFileContent(message: any, filePath: string): string | null {
   if (message.content && Array.isArray(message.content)) {
     for (const block of message.content) {
       if (block.type === 'tool_use' && 

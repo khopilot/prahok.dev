@@ -12,7 +12,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_DIR="/home/nicolas/projects/development/prahok"
+PROJECT_DIR="/home/nicolas/projects/prahok.dev"
 BACKUP_DIR="/home/nicolas/backups/prahok"
 LOG_DIR="/home/nicolas/logs/prahok"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -28,12 +28,18 @@ command_exists() {
 echo -e "${YELLOW}📋 Running pre-deployment checks...${NC}"
 
 # Check required commands
-for cmd in docker docker-compose git; do
+for cmd in docker git; do
     if ! command_exists $cmd; then
         echo -e "${RED}❌ Error: $cmd is not installed${NC}"
         exit 1
     fi
 done
+
+# Check for docker compose (v2)
+if ! docker compose version >/dev/null 2>&1; then
+    echo -e "${RED}❌ Error: docker compose is not available${NC}"
+    exit 1
+fi
 
 # Check environment file
 if [ ! -f ".env" ]; then
@@ -63,7 +69,7 @@ if [ -d "$PROJECT_DIR" ]; then
     docker exec prahok-postgres pg_dump -U prahok_user prahok_db | gzip > "$BACKUP_DIR/db_backup_$TIMESTAMP.sql.gz" 2>/dev/null || true
     
     # Environment backup
-    tar -czf "$BACKUP_DIR/env_backup_$TIMESTAMP.tar.gz" .env docker-compose.prod.yml 2>/dev/null || true
+    tar -czf "$BACKUP_DIR/env_backup_$TIMESTAMP.tar.gz" .env docker compose.prod.yml 2>/dev/null || true
     
     echo -e "${GREEN}✅ Backup created${NC}"
 fi
@@ -74,15 +80,15 @@ git pull origin main
 
 # Build Docker images
 echo -e "${YELLOW}🔨 Building Docker images...${NC}"
-docker-compose -f docker-compose.prod.yml build --no-cache
+docker compose -f docker-compose.prod.yml build --no-cache
 
 # Stop current services
 echo -e "${YELLOW}🛑 Stopping current services...${NC}"
-docker-compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml down
 
 # Start new services
 echo -e "${YELLOW}🚀 Starting services...${NC}"
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 
 # Wait for services to be ready
 echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
@@ -90,7 +96,7 @@ sleep 10
 
 # Run database migrations
 echo -e "${YELLOW}🔄 Running database migrations...${NC}"
-docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate deploy
+docker compose -f docker-compose.prod.yml exec -T api npx prisma migrate deploy
 
 # Health checks
 echo -e "${YELLOW}🏥 Running health checks...${NC}"
@@ -102,7 +108,7 @@ if [ "$API_HEALTH" = "200" ]; then
 else
     echo -e "${RED}❌ API health check failed (HTTP $API_HEALTH)${NC}"
     echo "Rolling back..."
-    docker-compose -f docker-compose.prod.yml down
+    docker compose -f docker-compose.prod.yml down
     exit 1
 fi
 
@@ -113,7 +119,7 @@ if [ "$WEB_HEALTH" = "200" ]; then
 else
     echo -e "${RED}❌ Frontend health check failed (HTTP $WEB_HEALTH)${NC}"
     echo "Rolling back..."
-    docker-compose -f docker-compose.prod.yml down
+    docker compose -f docker-compose.prod.yml down
     exit 1
 fi
 
@@ -127,7 +133,7 @@ echo "[$TIMESTAMP] Deployment completed successfully" >> "$LOG_DIR/deployments.l
 echo -e "${GREEN}✅ Deployment completed successfully!${NC}"
 echo ""
 echo "📊 Service Status:"
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 echo ""
 echo "🔗 Access your application at:"
@@ -135,4 +141,4 @@ echo "   - Frontend: https://prahok.dev"
 echo "   - API Health: https://prahok.dev/api/health"
 echo ""
 echo "📝 View logs with:"
-echo "   docker-compose -f docker-compose.prod.yml logs -f [service_name]"
+echo "   docker compose -f docker-compose.prod.yml logs -f [service_name]"

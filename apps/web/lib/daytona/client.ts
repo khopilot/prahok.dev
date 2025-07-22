@@ -66,13 +66,15 @@ export class DaytonaService {
       console.log('📋 Current sandbox state:', sandbox.state);
       
       // Check if sandbox is already running or doesn't need to be started
-      if (sandbox.state === 'running' || sandbox.state === 'active') {
+      // Convert state to string for comparison
+      const stateStr = String(sandbox.state).toLowerCase();
+      if (stateStr === 'running' || stateStr === 'active') {
         console.log('✅ Sandbox is already running');
         return;
       }
       
       // Only try to start if sandbox is in a startable state
-      if (sandbox.state === 'stopped' || sandbox.state === 'created') {
+      if (stateStr === 'stopped' || stateStr === 'created') {
         console.log('⏳ Waiting for sandbox to be ready...');
         await new Promise(resolve => setTimeout(resolve, 3000));
         

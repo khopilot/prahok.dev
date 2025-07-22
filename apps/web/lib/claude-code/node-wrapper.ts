@@ -156,9 +156,11 @@ export async function executeClaudeCodeWithScript(options: ClaudeCodeOptions): P
     
     nodeProcess.on('error', reject);
     
-    nodeProcess.stderr.on('data', (data) => {
-      console.error('Claude Code stderr:', data.toString());
-    });
+    if (nodeProcess.stderr) {
+      nodeProcess.stderr.on('data', (data) => {
+        console.error('Claude Code stderr:', data.toString());
+      });
+    }
     
     nodeProcess.on('exit', (code) => {
       if (code !== 0 && code !== null) {

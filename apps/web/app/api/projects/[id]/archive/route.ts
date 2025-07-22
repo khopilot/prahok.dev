@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const token = request.headers.get("authorization");
@@ -16,7 +16,8 @@ export async function PATCH(
       );
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/projects/${params.id}/archive`, {
+    const { id } = await params;
+    const response = await fetch(`${API_BASE_URL}/api/projects/${id}/archive`, {
       method: "PATCH",
       headers: {
         "Authorization": token,

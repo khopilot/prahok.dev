@@ -41,10 +41,10 @@ export class DaytonaService {
 
       console.log('✅ Sandbox created:', sandbox.id);
       console.log('📋 Sandbox details:', {
-        id: sandbox.id,
-        state: sandbox.state,
-        // Log any other available properties
-        ...sandbox
+        // Spread sandbox first to avoid duplicate keys
+        ...sandbox,
+        // Then override specific properties if needed
+        state: sandbox.state
       });
       
       return sandbox;

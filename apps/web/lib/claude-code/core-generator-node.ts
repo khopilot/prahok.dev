@@ -2,11 +2,8 @@
  * Core generator using Node.js wrapper for Claude Code SDK
  */
 
-import { nodeQuery, patchClaudeCodeForNode } from './node-wrapper';
+import { executeClaudeCode } from './node-wrapper';
 import type { SDKMessage } from "@anthropic-ai/claude-code";
-
-// Apply the patch to force Node.js runtime
-patchClaudeCodeForNode();
 
 export interface GenerationOptions {
   prompt: string;
@@ -47,12 +44,14 @@ export async function generateCode(options: GenerationOptions): Promise<Generati
     const enhancedPrompt = buildEnhancedPrompt(prompt, language, projectType, features);
 
     // Use our Node.js wrapper
-    for await (const message of nodeQuery({
+    const nodeMessages = await executeClaudeCode({
       prompt: enhancedPrompt,
+      apiKey: process.env.ANTHROPIC_API_KEY || '',
       maxTurns,
-      model: process.env.CLAUDE_CODE_MODEL,
-      abortController
-    })) {
+      cwd: '/tmp'
+    });
+    
+    for (const message of nodeMessages) {
       messages.push(message);
       
       // Call callback if provided
@@ -61,7 +60,7 @@ export async function generateCode(options: GenerationOptions): Promise<Generati
       }
 
       // Extract files from tool use
-      if (message.type === 'assistant' && message.content) {
+      if (message.type === 'assistant' && (message as any).content) {
         const extractedFiles = extractFilesFromMessage(message);
         files.push(...extractedFiles);
       }
@@ -121,7 +120,7 @@ export async function generateCodeDirect(options: GenerationOptions): Promise<Ge
         onMessage(message);
       }
 
-      if (message.type === 'assistant' && message.content) {
+      if (message.type === 'assistant' && (message as any).content) {
         const extractedFiles = extractFilesFromMessage(message);
         files.push(...extractedFiles);
       }

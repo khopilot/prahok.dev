@@ -107,9 +107,11 @@ run();
     });
     
     // Handle stderr
-    nodeProcess.stderr.on('data', (data) => {
-      console.error('Claude Code stderr:', data.toString());
-    });
+    if (nodeProcess.stderr) {
+      nodeProcess.stderr.on('data', (data) => {
+        console.error('Claude Code stderr:', data.toString());
+      });
+    }
     
     // Handle process exit
     nodeProcess.on('exit', (code) => {

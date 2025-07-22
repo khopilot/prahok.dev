@@ -1,49 +1,76 @@
 /**
- * Fix for Claude Code SDK spawn issue in Next.js environment
- * This module patches the child_process.spawn to handle bun correctly
+ * Fix for Claude Code SDK spawn issues
+ * This module provides a wrapper to handle bun spawn issues
  */
 
-import { spawn as originalSpawn } from 'child_process';
-import * as childProcess from 'child_process';
+import { spawn as originalSpawn, SpawnOptions, ChildProcess } from 'child_process';
 
-// Store the original spawn function
-const _originalSpawn = originalSpawn;
-
-// Create a patched spawn function
-const patchedSpawn: typeof originalSpawn = function(command, args?, options?) {
-  // If trying to spawn bun, force using node instead
+// Create a spawn wrapper that intercepts bun calls
+export function spawn(
+  command: string,
+  args?: readonly string[],
+  options?: SpawnOptions
+): ChildProcess {
+  // If trying to spawn bun, use node instead
   if (command === 'bun') {
     console.log('[Claude Code Fix] Intercepting bun spawn, using node instead');
     command = 'node';
     
-    // Ensure node is in the PATH by adding common locations
-    if (options && typeof options === 'object' && 'env' in options) {
-      const env = options.env as any;
-      if (env.PATH && !env.PATH.includes('/opt/homebrew/opt/node')) {
-        env.PATH = `/opt/homebrew/opt/node@20/bin:/usr/local/bin:/usr/bin:${env.PATH}`;
+    // Ensure node is in the PATH
+    if (options?.env) {
+      const env = { ...options.env };
+      if (!env.PATH?.includes('/opt/homebrew/opt/node')) {
+        env.PATH = `/opt/homebrew/opt/node@20/bin:/usr/local/bin:/usr/bin:${env.PATH || process.env.PATH}`;
       }
-    } else if (options && typeof options === 'object') {
-      // Add env with PATH if not present
-      (options as any).env = {
-        ...process.env,
-        PATH: `/opt/homebrew/opt/node@20/bin:/usr/local/bin:/usr/bin:${process.env.PATH}`,
-      };
+      options = { ...options, env };
     }
   }
   
-  // Call original spawn with potentially modified command
-  return _originalSpawn.call(this, command, args, options);
-} as any;
-
-// Patch the child_process module
-(childProcess as any).spawn = patchedSpawn;
-
-// Also patch the default export if it exists
-if (childProcess.default) {
-  (childProcess.default as any).spawn = patchedSpawn;
+  // Call original spawn with the potentially modified command
+  if (args && options) {
+    return originalSpawn(command, args, options);
+  } else if (args) {
+    return originalSpawn(command, args);
+  } else {
+    return originalSpawn(command);
+  }
 }
 
-// Export a confirmation that patching is done
-export const SPAWN_PATCHED = true;
+// Export a function to patch the global child_process module
+export function patchChildProcess() {
+  const cp = require('child_process');
+  const original = cp.spawn;
+  
+  cp.spawn = function(...args: any[]) {
+    const [command, ...rest] = args;
+    
+    if (command === 'bun') {
+      console.log('[Claude Code Fix] Global patch: Intercepting bun spawn');
+      args[0] = 'node';
+      
+      // Fix PATH in options if present
+      const optionsIndex = rest.length === 2 ? 1 : rest.length === 1 && !Array.isArray(rest[0]) ? 0 : -1;
+      if (optionsIndex >= 0 && rest[optionsIndex]?.env) {
+        const env = rest[optionsIndex].env;
+        if (!env.PATH?.includes('/opt/homebrew/opt/node')) {
+          env.PATH = `/opt/homebrew/opt/node@20/bin:/usr/local/bin:/usr/bin:${env.PATH || process.env.PATH}`;
+        }
+      }
+    }
+    
+    return original.apply(this, args);
+  };
+  
+  console.log('[Claude Code Fix] child_process.spawn patched globally');
+}
 
-console.log('[Claude Code Fix] child_process.spawn has been patched to handle bun issues');
+// Auto-patch on import
+if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'test') {
+  patchChildProcess();
+}
+
+export function ensureSpawnPatch() {
+  // This function ensures the patch is applied
+  console.log('[Claude Code Fix] Spawn patch is active');
+  patchChildProcess();
+}

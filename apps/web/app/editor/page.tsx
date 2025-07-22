@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
@@ -20,7 +20,7 @@ interface GenerationResult {
   error?: string;
 }
 
-export default function EditorPage() {
+function EditorContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -589,5 +589,13 @@ export default function EditorPage() {
       </main>
       
     </div>
+  );
+}
+
+export default function EditorPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EditorContent />
+    </Suspense>
   );
 }
